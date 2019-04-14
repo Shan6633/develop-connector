@@ -23,7 +23,11 @@ class Register extends Component {
       this.setState({ errors: nextProps.errors });
     }
   }
-
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push("/dashboard");
+    }
+  }
   onChange(e) {
     this.setState({ [e.target.name]: e.target.value });
   }
@@ -132,6 +136,7 @@ class Register extends Component {
     );
   }
 }
+
 Register.propTypes = {
   registerUser: PropTypes.func.isRequired,
   auth: PropTypes.object.isRequired,
