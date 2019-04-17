@@ -40,25 +40,27 @@ router.get(
       .catch(err => res.status(404).json(err));
   }
 );
-//@route   GET api/profile/all
-//@desc    Get all profile
+
+//@route   Get api/profile/all (hit from front end)
+//@desc    get all profiles
 //@access  Public
 
 router.get("/all", (req, res) => {
   const errors = {};
   Profile.find()
     .populate("user", ["name", "avatar"])
-    .then(profile => {
-      if (!profile) {
-        errors.noprofile = "There is no profile for this user";
-        res.status(404).json(errors);
+    .then(profiles => {
+      if (!profiles) {
+        errors.nonprofile = "There is no profile for this user";
+        return res.status(404).json(errors);
       }
-      res.json(profile);
+      res.json(profiles);
     })
-    .catch(err => res.status(404).json({ profile: "There is no profiles" }));
+    .catch(err => res.status(404).json({ profile: "There are no profiles" }));
 });
-//@route   GET api/profile/handle/:handle
-//@desc    Get Profile by handle
+
+//@route   Get api/profile/handle:handle (hit from front end)
+//@desc    get profile by handle
 //@access  Public
 
 router.get("/handle/:handle", (req, res) => {
@@ -67,16 +69,16 @@ router.get("/handle/:handle", (req, res) => {
     .populate("user", ["name", "avatar"])
     .then(profile => {
       if (!profile) {
-        errors.profile = "There is no profile for this user";
-        res.status(404).json(errors);
+        errors.nonprofile = "There is no profile for this user";
+        return res.status(404).json(errors);
       }
       res.json(profile);
     })
     .catch(err => res.status(404).json(err));
 });
 
-//@route   GET api/profile/user/:user_id
-//@desc    Get Profile by user ID
+//@route   Get api/profile/handle:user_id (hit from front end)
+//@desc    get profile by user id
 //@access  Public
 
 router.get("/user/:user_id", (req, res) => {
@@ -85,8 +87,8 @@ router.get("/user/:user_id", (req, res) => {
     .populate("user", ["name", "avatar"])
     .then(profile => {
       if (!profile) {
-        errors.profile = "There is no profile for this user";
-        res.status(404).json(errors);
+        errors.nonprofile = "There is no profile for this user";
+        return res.status(404).json(errors);
       }
       res.json(profile);
     })
@@ -153,18 +155,17 @@ router.post(
   }
 );
 
-//@route   GET api/profile/experience
-//@desc    Add experience to profile
+//@route   POST api/profile/experience
+//@desc    add experience to profile
 //@access  Private
+
 router.post(
   "/experience",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateExperienceInput(req.body);
 
-    // Check Validation
     if (!isValid) {
-      // Return any errors with 400 status
       return res.status(400).json(errors);
     }
 
@@ -179,7 +180,6 @@ router.post(
         description: req.body.description
       };
 
-      // Add to exp array
       profile.experience.unshift(newExp);
 
       profile.save().then(profile => res.json(profile));
@@ -195,10 +195,7 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = validateEducationInput(req.body);
-
-    // Check Validation
     if (!isValid) {
-      // Return any errors with 400 status
       return res.status(400).json(errors);
     }
 
@@ -213,9 +210,7 @@ router.post(
         description: req.body.description
       };
 
-      // Add to edu array
       profile.education.unshift(newEdu);
-
       profile.save().then(profile => res.json(profile));
     });
   }
@@ -254,15 +249,11 @@ router.delete(
   (req, res) => {
     Profile.findOne({ user: req.user.id })
       .then(profile => {
-        // Get remove index
         const removeIndex = profile.education
           .map(item => item.id)
           .indexOf(req.params.edu_id);
 
-        // Splice out of array
         profile.education.splice(removeIndex, 1);
-
-        // Save
         profile.save().then(profile => res.json(profile));
       })
       .catch(err => res.status(404).json(err));

@@ -2,9 +2,7 @@ import {
   GET_PROFILE,
   GET_PROFILES,
   PROFILE_LOADING,
-  CLEAR_CURRENT_PROFILE,
-  GET_ERRORS,
-  SET_CURRENT_USER
+  CLEAR_CURRENT_PROFILE
 } from "../actions/types";
 
 const initialState = {
@@ -26,12 +24,17 @@ export default function(state = initialState, action) {
         profile: action.payload,
         loading: false
       };
+    case GET_PROFILES:
+      return {
+        ...state,
+        profiles: action.payload,
+        loading: false
+      };
     case CLEAR_CURRENT_PROFILE:
       return {
         ...state,
         profile: null
       };
-
     default:
       return state;
   }
